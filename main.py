@@ -296,7 +296,8 @@ def update_secret_santa_message(context: CallbackContext, santa: SecretSanta):
             min_participants_text = f". Hacen falta <b>{santa.get_missing_count()}</b> participantes más para poder empezar el sorteo"
 
         base_text = '{santa} ¡Muy bien! ¡Un nuevo participante!\nLista de participantes:\n\n{participants}\n\n' \
-                    'Para participar, utiliza el botón "<b>Me apunto</b>" de abajo y luego pulsa "<b>iniciar </b>".\n' \
+                    'Para participar, utiliza el botón "<b>Me apunto</b>" de abajo.\n' \
+                    'Se abrirá un nuevo chat llamado "Amigo Invisible Bot 2022". En la parte inferior de ese chat pulsa "<b>iniciar </b>".\n' \
                     'Solo {creator} puede iniciar este sorteo de Amigo Invisible. {min_participants}'
 
         text = base_text.format(
