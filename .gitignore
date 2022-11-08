@@ -8,3 +8,4 @@ config.toml
 *.png
 *.jpg
 !*.default.jpg
+__pycache__

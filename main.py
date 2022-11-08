@@ -36,7 +36,7 @@ BLOCKED_KEY = "blocked"
 RECENTLY_LEFT_KEY = "recently_left"
 RECENTLY_STARTED_SANTAS_KEY = "recently_closed_santas"
 
-EMPTY_SECRET_SANTA_STR = f'{Emoji.SANTA}{Emoji.TREE} Nobody joined this Secret Santa yet! Use the "<b>join</b>" button below to join'
+EMPTY_SECRET_SANTA_STR = f'{Emoji.SANTA}{Emoji.TREE} Nadie se ha apuntado al Amigo Invisible 2022 todavía. Pulsa el botón "<b>Me apunto</b>" de abajo para apuntarte.'
 
 
 class Time:
@@ -54,11 +54,11 @@ class Time:
 
 
 class Error:
-    SEND_MESSAGE_DISABLED = "have no rights to send a message"
-    REMOVED_FROM_GROUP = "bot was kicked from the"  # it might continue with "group chat" or "supergroup chat"
+    SEND_MESSAGE_DISABLED = "no tiene permiso para enviar un mensaje"
+    REMOVED_FROM_GROUP = "El bot fue expulsado por"  # it might continue with "group chat" or "supergroup chat"
     CANT_EDIT = "chat_write_forbidden"  # we receive this when we try to edit a message/answer a callback query but we are muted
-    MESSAGE_TO_EDIT_NOT_FOUND = "message to edit not found"
-    USER_BLOCKED_BOT = "bot was blocked by the user"
+    MESSAGE_TO_EDIT_NOT_FOUND = "mensaje a editar no encontrado"
+    USER_BLOCKED_BOT = "El bot fue bloqueado por el usuario"
 
 
 class Commands:
@@ -251,10 +251,10 @@ def gen_participants_list(participants: dict, join_by: Optional[str] = None):
 
 
 def cancel_because_cant_send_messages(context: CallbackContext, santa: SecretSanta):
-    text = "<i>This Secret Santa was canceled because I can't send messages in this group</i>"
+    text = "<i>Este Amigo Invisible fue cancelado porque no puedo enviar mensajes en este grupo</i>"
     if santa.get_participants_count():
         participants_list = gen_participants_list(santa.participants, join_by="\n")
-        text = f"{text}\nParticipants:\n\n{participants_list}"
+        text = f"{text}\nParticipantes:\n\n{participants_list}"
 
     return context.bot.edit_message_text(
         chat_id=santa.chat_id,
@@ -276,9 +276,9 @@ def update_secret_santa_message(context: CallbackContext, santa: SecretSanta):
     elif santa.started:
         participants_list = gen_participants_list(santa.participants)
 
-        base_text = '{santa} This Secret Santa has been started and everyone ' \
-                    '<a href="{bot_link}">received their match</a>!\n' \
-                    'Participants list:\n\n' \
+        base_text = '{santa} Este Amigo Invisible ha sido arrancado y todos ' \
+                    '<a href="{bot_link}">han recibido su amigo invisible</a>!\n' \
+                    'Lista de participantes:\n\n' \
                     '{participants}'
 
         text = base_text.format(
@@ -293,11 +293,11 @@ def update_secret_santa_message(context: CallbackContext, santa: SecretSanta):
 
         min_participants_text = ""
         if santa.get_missing_count() > 0:
-            min_participants_text = f". Other <b>{santa.get_missing_count()}</b> people are needed to start it"
+            min_participants_text = f". Hacen falta <b>{santa.get_missing_count()}</b> participantes más para poder empezar el sorteo"
 
-        base_text = '{santa} Oh-oh! A new Secret Santa!\nParticipants list:\n\n{participants}\n\n' \
-                    'To join, use the "<b>join</b>" button below and then tap on "<b>start </b>".\n' \
-                    'Only {creator} can start this Secret Santa{min_participants}'
+        base_text = '{santa} ¡Muy bien! ¡Un nuevo participante!\nLista de participantes:\n\n{participants}\n\n' \
+                    'Para participar, utiliza el botón "<b>Me apunto</b>" de abajo y luego pulsa "<b>iniciar </b>".\n' \
+                    'Solo {creator} puede iniciar este sorteo de Amigo Invisible. {min_participants}'
 
         text = base_text.format(
             santa=Emoji.SANTA,
@@ -329,10 +329,10 @@ def update_secret_santa_message(context: CallbackContext, santa: SecretSanta):
 
 def create_new_secret_santa(update: Update, context: CallbackContext, santa: Optional[SecretSanta] = None):
     if santa:
-        text_message_exists = f"👆 There is already an <a href=\"{santa.link()}\">active Secret Santa</a> in " \
-                              f"this chat! " \
-                              f"You can ask {santa.creator_name_escaped} to cancel it using the message's " \
-                              f"buttons"
+        text_message_exists = f"👆 Ya hay un sorteo <a href=\"{santa.link()}\">activo del Amigo Invisible</a> dentro " \
+                              f"de este chat! " \
+                              f"Puedes preguntar {santa.creator_name_escaped} para cancelar el sorteo utilizando el botón " \
+                              f"del mensaje"
         try:
             context.bot.send_message(
                 update.effective_chat.id,
@@ -344,9 +344,9 @@ def create_new_secret_santa(update: Update, context: CallbackContext, santa: Opt
             if str(e).lower() != "replied message not found":
                 raise e
 
-            update.message.reply_html(f"{Emoji.SANTA} There is already an active Secret Santa"
-                                      f" in this chat! You can ask {santa.creator_name_escaped} "
-                                      f"(or an administrator) to cancel it using <code>/cancel</code>")
+            update.message.reply_html(f"{Emoji.SANTA} Ya hay un sorteo del Amigo Invisble activo"
+                                      f" en este chat. Puedes preguntar a {santa.creator_name_escaped} "
+                                      f"(o a un administrador) para que lo cancele utilizando <code>/cancel</code>")
 
         return
 
@@ -419,8 +419,8 @@ def on_join_deeplink(update: Update, context: CallbackContext):
     logger.info("join deeplink from %d, chat id: %d", update.effective_user.id, santa_chat_id)
 
     if find_key(context.dispatcher.chat_data, santa_chat_id, MUTED_KEY):
-        update.message.reply_html(f"It looks like I can't send messages in that group. I can't let "
-                                  f"new participants join until I can send messages there, I'm sorry {Emoji.SAD}")
+        update.message.reply_html(f"Parece que no puedo enviar mensajes en este grupo. No puedo "
+                                  f"dejar a nuevos participantes unirse, hasta poder enviar mensajes. Lo siento {Emoji.SAD}")
         return
 
     santa = find_santa(context.dispatcher.chat_data, santa_chat_id)
@@ -429,7 +429,7 @@ def on_join_deeplink(update: Update, context: CallbackContext):
         # we should check if the chat is in the recently left chats in context.bot_data
         if RECENTLY_LEFT_KEY in context.bot_data and santa_chat_id in context.bot_data[RECENTLY_LEFT_KEY]:
             logger.debug(f"no active santa in {santa_chat_id} and the chat appears among the recently left chats")
-            update.message.reply_html(f"It looks like I've been removed from this Secret Santa's group {Emoji.SAD}")
+            update.message.reply_html(f"Parece que me han eliminado de este grupo {Emoji.SAD}")
         else:
             # raise ValueError(f"user tried to join, but no secret santa is active in {santa_chat_id}")
 
@@ -438,13 +438,13 @@ def on_join_deeplink(update: Update, context: CallbackContext):
             # old secret santa
 
             logger.debug(f"no active santa in {santa_chat_id}")
-            update.message.reply_html(f"It looks like there's no active Secret Santa in this group {Emoji.SAD} "
-                                      f"you probably used a \"<b>join</b>\" button from an old/inactive Secret Santa")
+            update.message.reply_html(f"Parece que no hay ningún Amigo Invisible activo en este grupo {Emoji.SAD} "
+                                      f"Probablemente has utilizado el botón \"<b>Me apunto</b>\" de un antiguo o inactivo Amigo Invisible")
         return
 
     if config.santa.max_participants and santa.get_participants_count() >= config.santa.max_participants:
-        text = f"I'm sorry, unfortunately {santa.inline_link('this Secret Santa')} has already reached the " \
-               f"max number of participants {Emoji.SAD}"
+        text = f"Lo siento, lamentablemente {santa.inline_link('este Amigo Invisible')} ha llegado a su " \
+               f"número máximo de participantes {Emoji.SAD}"
         update.message.reply_html(text)
         return
 
@@ -452,15 +452,15 @@ def on_join_deeplink(update: Update, context: CallbackContext):
     context.dispatcher.chat_data[santa_chat_id][ACTIVE_SECRET_SANTA_KEY] = santa.dict()
 
     if santa.creator_id == update.effective_user.id:
-        wait_for_start_text = f"\nYou can start it anytime using the \"<b>start match</b>\" button in the group, " \
-                              f"once at least {config.santa.min_participants} people have joined"
+        wait_for_start_text = f"\nPuedes iniciar el sorteo en cualquier momento con el botón \"<b>Iniciar sorteo</b>\" en el grupo, " \
+                              f"cuando se hayan unido por lo menos {config.santa.min_participants} participantes"
     else:
-        wait_for_start_text = f"Now wait for {santa.creator_name_escaped} to start it"
+        wait_for_start_text = f"Ahora espera a {santa.creator_name_escaped} para iniciar el sorteo"
 
     reply_markup = keyboards.joined_message(santa_chat_id)
     sent_message = update.message.reply_html(
-        f"{Emoji.TREE} You joined {santa.chat_title_escaped}'s {santa.inline_link('Secret Santa')}!\n"
-        f"{wait_for_start_text}. You will receive your match here, in this chat",
+        f"{Emoji.TREE} Te has unido al {santa.chat_title_escaped} {santa.inline_link('Amigo Invisible')}!\n"
+        f"{wait_for_start_text}. Vas a recibir tu amigo invisble aquí, en este chat",
         reply_markup=reply_markup
     )
 
@@ -476,7 +476,7 @@ def on_leave_button_group(update: Update, context: CallbackContext, santa: Optio
     logger.debug("leave button in group: %d -> %d", update.effective_user.id, update.effective_chat.id)
 
     if not santa.is_participant(update.effective_user):
-        update.callback_query.answer(f"{Emoji.FREEZE} You haven't joined this Secret Santa!", show_alert=True)
+        update.callback_query.answer(f"{Emoji.FREEZE} ¡No te has unido a este Amigo Invisible!", show_alert=True)
         return
 
     # we need this for later
@@ -485,7 +485,7 @@ def on_leave_button_group(update: Update, context: CallbackContext, santa: Optio
     santa.remove(update.effective_user)
     update_secret_santa_message(context, santa)
 
-    update.callback_query.answer(f"You have been removed from this Secret Santa")
+    update.callback_query.answer(f"Has sido retirado de este sorteo de Amigo Invisible")
 
     logger.debug("removing keyboard from last join message in private...")
     context.bot.edit_message_reply_markup(update.effective_user.id, last_join_message_id, reply_markup=None)
@@ -511,7 +511,7 @@ def on_match_button(update: Update, context: CallbackContext, santa: Optional[Se
     logger.debug("start match button: %d -> %d", update.effective_user.id, update.effective_chat.id)
     if santa.creator_id != update.effective_user.id:
         update.callback_query.answer(
-            f"{Emoji.CROSS} Only {santa.creator_name} can use this button and start the Secret Santa match",
+            f"{Emoji.CROSS} Solo {santa.creator_name} puede utilizar este botón e iniciar el sorteo del Amigo Invisible",
             show_alert=True,
             cache_time=Time.DAY_3
         )
@@ -519,9 +519,9 @@ def on_match_button(update: Update, context: CallbackContext, santa: Optional[Se
 
     # we answer to the callback query so the user doesn't (hopefully) keep on tapping on the button
     # while the matches are generated
-    update.callback_query.answer(f'{Emoji.HOURGLASS} Generating matches...', cache_time=5)
+    update.callback_query.answer(f'{Emoji.HOURGLASS} Sorteando amigos invisibles...', cache_time=5)
 
-    sent_message = update.effective_message.reply_html(f'{Emoji.HOURGLASS} <i>Matching users...</i>')
+    sent_message = update.effective_message.reply_html(f'{Emoji.HOURGLASS} <i>Sorteando participantes...</i>')
 
     blocked_by = []
     for user_id, user_data in santa.participants.items():
@@ -538,8 +538,8 @@ def on_match_button(update: Update, context: CallbackContext, santa: Optional[Se
 
     if blocked_by:
         users_list = ", ".join(blocked_by)
-        text = f"I can't start the Secret Santa because some users ({users_list}) have blocked me {Emoji.SAD}\n" \
-               f"They need to unblock me so I can send them their match"
+        text = f"No puedo iniciar el sorteo porque algún usuario de ({users_list}) ma ha bloqueado {Emoji.SAD}\n" \
+               f"Deben desbloquearme para poder mandarles su amigo invisible"
         sent_message.edit_text(text)
         return
 
@@ -560,7 +560,7 @@ def on_match_button(update: Update, context: CallbackContext, santa: Optional[Se
         utilities.log_tg(context.bot, f"#drafting_error while generating pairs for chat {update.effective_chat.id}")
 
         text = f"{Emoji.WARN} <i>{update.effective_user.mention_html()}, " \
-               f"something went wrong during the Secret Santa draw. Please try again</i>"
+               f"Algo ha salido mal durante el sorteo. Por favor, inténtalo de nuevo</i>"
         sent_message.edit_text(text)
         return
 
@@ -570,7 +570,7 @@ def on_match_button(update: Update, context: CallbackContext, santa: Optional[Se
         match_name = santa.get_user_name(match_id)
         match_mention = utilities.mention_escaped_by_id(match_id, match_name)
 
-        text = f"{Emoji.SANTA}{Emoji.PRESENT} You are {match_mention}'s <a href=\"{santa.link()}\">Secret Santa</a>!"
+        text = f"{Emoji.SANTA}{Emoji.PRESENT} Eres el <a href=\"{santa.link()}\">Amigo Invisible</a> de {match_mention}"
 
         match_message = context.bot.send_message(receiver_id, text)
         santa.set_user_match_message_id(receiver_id, match_message.message_id)
@@ -582,7 +582,7 @@ def on_match_button(update: Update, context: CallbackContext, santa: Optional[Se
 
     save_recently_started_santa(context.bot_data, santa)
 
-    text = f"Everyone has received their match in their <a href=\"{BOT_LINK}\">private chats</a>!"
+    text = f"Todos los participantes han recibido su amigo invisible en su chat privado con el <a href=\"{BOT_LINK}\">bot del Amigo Invisible</a>"
     sent_message.edit_text(text)
 
     santa.start()
@@ -599,15 +599,15 @@ def on_cancel_button(update: Update, context: CallbackContext, santa: Optional[S
         # scenarios where this might happen: the bot is removed from the chat, then added back, and the
         # user keeps using an old secret santa message's buttons
         logger.warning("cancel button, but there is no active secret chanta in the chat")
-        update.callback_query.edit_message_text("<i>This Secret Santa is no longer active</i>", reply_markup=None)
+        update.callback_query.edit_message_text("<i>Este Amigo Invisible ya no está activo</i>", reply_markup=None)
         utilities.log_tg(context.bot, "cancel button used, but no active secret santa: check logs (especially whether "
                                       "we have been previously removed from the chat or not)!")
         return
 
     if santa.creator_id != update.effective_user.id:
         update.callback_query.answer(
-            f"{Emoji.CROSS} Only {santa.creator_name} can use this button. Administrators can use /cancel "
-            f"to cancel any active secret Santa",
+            f"{Emoji.CROSS} Solo {santa.creator_name} puede utilizar este botón. Administradores pueden utilizar /cancel "
+            f"para cancelar el sorteo actual",
             show_alert=True,
             cache_time=Time.DAY_3
         )
@@ -615,7 +615,7 @@ def on_cancel_button(update: Update, context: CallbackContext, santa: Optional[S
 
     context.chat_data.pop(ACTIVE_SECRET_SANTA_KEY, None)
 
-    text = "<i>This Secret Santa has been canceled by its creator</i>"
+    text = "<i>Este sorte de Amigo Invisble ha sido cancelado por su creador</i>"
     update.callback_query.edit_message_text(text, reply_markup=None)
 
 
@@ -626,14 +626,14 @@ def on_revoke_button(update: Update, context: CallbackContext, santa: Optional[S
     logger.debug("revoke button: %d -> %d", update.effective_user.id, update.effective_chat.id)
     if santa.creator_id != update.effective_user.id:
         update.callback_query.answer(
-            f"{Emoji.CROSS} Only {santa.creator_name} can use this button",
+            f"{Emoji.CROSS} Solo {santa.creator_name} puede utilizar este botón",
             show_alert=True,
             cache_time=Time.DAY_3
         )
         return
 
     return update.callback_query.answer(
-        f"{Emoji.WARN} The ability to revoke already-sent matches has been temporarily suspended",
+        f"{Emoji.WARN} La posibilidad de revocar amigos invisibles ya enviados ha sido suspendido temporalmente",
         show_alert=True,
         cache_time=Time.DAY_1
     )
@@ -648,9 +648,9 @@ def on_hide_commands_command(update: Update, context: CallbackContext):
         commands=[],
         scope=BotCommandScopeChatAdministrators(chat_id=update.effective_chat.id)
     )
-    update.message.reply_html("Done. It might take some time for them to disappear. "
-                              "You can use <code>/showcommands</code> if you want the group admins to be able to "
-                              "see them again")
+    update.message.reply_html("Hecho. Puede tardar un rato hasta que desaparezcan. "
+                              "Puedes utilizar <code>/showcommands</code> si quieres que los admins de este grupo lo"
+                              "vuelvan a ver")
 
 
 @fail_with_message(answer_to_message=False)
@@ -662,7 +662,7 @@ def on_show_commands_command(update: Update, context: CallbackContext):
         commands=Commands.GROUP_ADMINISTRATORS,
         scope=BotCommandScopeChatAdministrators(chat_id=update.effective_chat.id)
     )
-    update.message.reply_html("Done. It might take some time for them to appear")
+    update.message.reply_html("Hecho. Puede tardar un rato hasta que aparezcan")
 
 
 @fail_with_message(answer_to_message=False)
@@ -672,7 +672,7 @@ def on_cancel_command(update: Update, context: CallbackContext, santa: Optional[
     logger.debug("/cancel command: %d -> %d", update.effective_user.id, update.effective_chat.id)
 
     if not santa:
-        update.message.reply_html("<i>There is no active Secret Santa</i>")
+        update.message.reply_html("<i>No hay ningún sorte de Amigo Invisible activo</i>")
         return
 
     user_id = update.effective_user.id
@@ -686,7 +686,7 @@ def on_cancel_command(update: Update, context: CallbackContext, santa: Optional[
         context.bot.edit_message_text(
             chat_id=update.effective_chat.id,
             message_id=santa.santa_message_id,
-            text="<i>This Secret Santa has been canceled by its creator or by an administrator</i>",
+            text="<i>Este sorte de Amigo Invisble ha sido cancelado por su creador o un administrador</i>",
             reply_markup=None
         )
     except (TelegramError, BadRequest) as e:
@@ -696,7 +696,7 @@ def on_cancel_command(update: Update, context: CallbackContext, santa: Optional[
 
     context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text="<i>This chat's Secret Santa has ben canceled</i>",
+        text="<i>El Amigo Invisible de este chat ha sido cancelado</i>",
         reply_to_message_id=santa.santa_message_id,
         allow_sending_without_reply=True,  # send the message anyway even if the secret santa message has been deleted
     )
@@ -713,13 +713,13 @@ def private_chat_button():
             if not santa:
                 # we do not edit or delete this message when a Secrt Santa is started, so the buttons are still there
                 logger.debug("user tapped on a private chat button, but there is no active secret santa for that chat")
-                update.callback_query.answer(f"This chat's Secret Santa is no longer valid", show_alert=True)
+                update.callback_query.answer(f"El Amigo Invisible de este chat ya no es válido", show_alert=True)
                 update.callback_query.edit_message_reply_markup(reply_markup=None)
                 return
 
             if not santa.is_participant(update.effective_user):
                 # maybe the user left from the group's message
-                update.callback_query.answer(f"{Emoji.FREEZE} You are not participating in this Secret Santa!",
+                update.callback_query.answer(f"{Emoji.FREEZE} Tú no estás participando en este Amigo Invisible!",
                                              show_alert=True)
                 update.callback_query.edit_message_reply_markup(reply_markup=None)
                 return
@@ -742,9 +742,9 @@ def on_update_name_button_private(update: Update, context: CallbackContext, sant
         santa.set_user_name(update.effective_user, name)
         name_updated = True
 
-    update.callback_query.answer(f"Your name has been updated to: {name}\n\nThis option allows you to change your "
-                                 f"Telegram name and update it in the list (helpful if there are participants with "
-                                 f"similar names)", show_alert=True)
+    update.callback_query.answer(f"Tu nombre ha sido actualizado: {name}\n\nEsta opción te permite cambiar tu "
+                                 f"nombre de Telegram y atualizarlo en la lista (útil en el caso de tener participantes "
+                                 f"con nombres similares)", show_alert=True)
 
     if name_updated:
         update_secret_santa_message(context, santa)
@@ -758,8 +758,8 @@ def on_leave_button_private(update: Update, context: CallbackContext, santa: Sec
     santa.remove(update.effective_user)
     update_secret_santa_message(context, santa)
 
-    text = f"{Emoji.FREEZE} You have been removed from {santa.chat_title_escaped}'s " \
-           f"<a href=\"{santa.link()}\">Secret Santa</a>"
+    text = f"{Emoji.FREEZE} Ha sido eliminado del <a href=\"{santa.link()}\">Amigo Invisible</a> " \
+           f"del chat {santa.chat_title_escaped}'s"
     update.callback_query.edit_message_text(text, reply_markup=None)
     # update.callback_query.answer(f"You have been removed from this Secret Santa")
 
@@ -830,10 +830,10 @@ def on_new_group_chat(update: Update, context: CallbackContext):
     if not config.santa.start_button_on_new_group:
         return
 
-    text = f"Hello everyone! I'm a bot that helps group chats to organize their " \
-           f"Secret Santas {Emoji.SANTA}{Emoji.SHH}\n" \
-           f"Anyone can use the button below to start a new one. Alternatively, the <code>/newsanta</code> command " \
-           f"can be used"
+    text = f"¡Hola a todos! Soy el bot que ayuda a los chats de grupo a organizar su" \
+           f"Amigo Invisible {Emoji.SANTA}{Emoji.SHH}\n" \
+           f"Cualquier miembro del grupo puede iniciar un nuevo sorteo con el botón de abajo." \
+           f"O se puede utilizar el comando <code>/newsanta</code>"
 
     update.message.reply_html(
         text,
@@ -846,11 +846,11 @@ def on_new_group_chat(update: Update, context: CallbackContext):
 def on_help(update: Update, _):
     logger.info("/start or /help from: %s (text: %s)", update.effective_user.id, update.message.text)
 
-    source_code = "https://github.com/zeroone2numeral2/tg-secret-santa-bot"
-    text = f"Hello {utilities.html_escape(update.effective_user.first_name)}!" \
-           f"\nI can help you organize a Secret Santa 🤫🎅🏼🎁 in your group chats :)\n" \
-           f"Just add me to a chat and use <code>/newsanta</code> to start a new Secret Santa." \
-           f"\n\nSource code <a href=\"{source_code}\">here</a>"
+    source_code = "https://github.com/tprumbs/tg-amigo-invisible-bot"
+    text = f"¡Hola {utilities.html_escape(update.effective_user.first_name)}!" \
+           f"\nPuedo ayudarte a orginzar un sorteo de Amigo Invisible 🤫🎅🏼🎁 en tu chat de grupo :)\n" \
+           f"Añademe a un chat y utiliza <code>/newsanta</code> para iniciar un sorteo de Amigo Invisible." \
+           f"\n\nCódigo fuente <a href=\"{source_code}\">aquí</a>"
 
     update.message.reply_html(text)
 
@@ -870,7 +870,7 @@ def admin_ongoing_command(update: Update, context: CallbackContext):
         santa = SecretSanta.from_dict(chat_data[ACTIVE_SECRET_SANTA_KEY])
         participants_count += santa.get_participants_count()
 
-    text = f"• ongoing secret santas: {santa_count} ({participants_count} participants)"
+    text = f"• Sorte de Amigo Invisible en curso: {santa_count} ({participants_count} participantes)"
 
     if RECENTLY_STARTED_SANTAS_KEY in context.bot_data:
         recently_started_chats_count = len(context.bot_data[RECENTLY_STARTED_SANTAS_KEY])
@@ -878,8 +878,8 @@ def admin_ongoing_command(update: Update, context: CallbackContext):
         for _, santas_data in context.bot_data[RECENTLY_STARTED_SANTAS_KEY].items():
             recently_started_santas_count += len(santas_data)
 
-        text = f"{text}\n• recently started secret santas: {recently_started_santas_count} in " \
-               f"{recently_started_chats_count} groups"
+        text = f"{text}\n• Sorteo iniciados: {recently_started_santas_count} en " \
+               f"{recently_started_chats_count} grupos"
 
     update.message.reply_html(text)
 
@@ -965,10 +965,10 @@ def on_my_chat_member_update(update: Update, context: CallbackContext):
 
 def secret_santa_expired(context: CallbackContext, santa: SecretSanta):
     if not santa.started:
-        text = f"<i>This Secret Santa expired ({config.santa.timeout} days has passed from its creation)</i>"
+        text = f"<i>Este sorte de Amigo Invisible ha caducado (Han pasado {config.santa.timeout} días desde su inicio)</i>"
     else:
         participants_list = gen_participants_list(santa.participants)
-        text = '{hourglass} This Secret Santa has been closed. Participants list:\n\n{participants}'.format(
+        text = '{hourglass} El sorteo de Amigo Invisible ha sido parado. Lista de participantes:\n\n{participants}'.format(
             hourglass=Emoji.HOURGLASS,
             participants="\n".join(participants_list)
         )
